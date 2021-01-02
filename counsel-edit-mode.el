@@ -1,4 +1,4 @@
-;;; counsel-edit-mode.el --- Edit results of Counsel Commands In-place -*- lexical-binding: t -*-
+;;; counsel-edit-mode.el --- Edit results of counsel commands in-place -*- lexical-binding: t -*-
 ;; Author: Tyler Dodge
 ;; Version: 0.5
 ;; Keywords: convenience, ag
