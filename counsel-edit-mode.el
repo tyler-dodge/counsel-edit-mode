@@ -2,7 +2,9 @@
 ;; Author: Tyler Dodge
 ;; Version: 0.5
 ;; Keywords: convenience, ag
-;; Package-Requires: ((emacs "25.1") (ht "2.3") (s "1.12.0"))
+;; Package-Requires: ((emacs "25.1") (ht "2.3") (s "1.12.0") (counsel "0.10.0"))
+;; URL: https://github.com/tyler-dodge/counsel-edit-mode
+;; Git-Repository: git://github.com/tyler-dodge/counsel-edit-mode.git
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -31,51 +33,51 @@
 (require 'ht)
 (require 's)
 
-(defgroup counsel-edit-mode nil
+(defgroup counsel-edit nil
   "Mode for Ag-Edit Ivy ag results."
   :group 'counsel)
 
 (defcustom counsel-edit-mode-major-mode
   'prog-mode
   "The default major-mode used by the
-`ag-edit-mode` buffer. This can be changed per `ag-edit-mode` buffer 
+`counsel-edit-mode` buffer. This can be changed per `counsel-edit-mode` buffer 
 by calling `counsel-edit-mode-change-major-mode` in that buffer."
   :type 'function
-  :group 'counsel-edit-mode)
+  :group 'counsel-edit)
 
 (defcustom counsel-edit-mode-expand-braces-by-default
   nil
-  "When this is set non-nil, `ag-edit-mode' will expand the context of each file until all matching delimeters are closed. 
+  "When this is set non-nil, `counsel-edit-mode' will expand the context of each file until all matching delimeters are closed. 
 This can be done manually per section by calling `counsel-edit-mode-expand-section'.
 If `counsel-edit-mode-expand-section' is called with a prefix arg, 
 it will expand every section in the buffer."
   :type 'boolean
-  :group 'counsel-edit-mode)
+  :group 'counsel-edit)
 
 (defcustom counsel-edit-mode-confirm-commits
   nil
   "The default major-mode used by the
-When this is set non-nil, `ag-edit-mode` will confirm commits with showing the changes in ediff. 
+When this is set non-nil, `counsel-edit-mode` will confirm commits with showing the changes in ediff. 
 <kbd>C-c C-c</kbd> confirms the changes in ediff whereas <kbd>q</kbd> will close the ediff session.
 "
   :type 'boolean
-  :group 'counsel-edit-mode)
+  :group 'counsel-edit)
 
 (defface counsel-edit-mode-overlay
   '((t . (:foreground "#99CCCC" :background "#AA2222"))) "Face for File Location Side Bar."
-  :group 'counsel-edit-mode)
+  :group 'counsel-edit)
 
 (defface counsel-edit-mode-expanded-context-overlay
   '((t . (:foreground "#AACCCC" :background "#774444"))) "Face for File Location Side Bar."
-  :group 'counsel-edit-mode)
+  :group 'counsel-edit)
 
 (defface counsel-edit-mode-overlay-deleted
   '((t . (:inherit counsel-edit-mode-overlay :strike-through t))) "Face for Deleted Lines in File Location Side Bar."
-  :group 'counsel-edit-mode)
+  :group 'counsel-edit)
 
 (defface counsel-edit-mode-expanded-context-overlay-deleted
   '((t . (:inherit counsel-edit-mode-expanded-context-overlay :strike-through t))) "Face for deleted lines in File Location Side Bar."
-  :group 'counsel-edit-mode)
+  :group 'counsel-edit)
 
 (defvar counsel-edit-mode-map
   (--doto (make-sparse-keymap)
@@ -91,10 +93,10 @@ When this is set non-nil, `ag-edit-mode` will confirm commits with showing the c
     (define-key it (kbd "C-c C-n") #'counsel-edit-mode-expand-context-down))
   "Keymap for `counsel-edit-mode'")
 
-(defvar ag-edit-ediff-mode-map
+(defvar counsel-edit-mode-ediff-mode-map
   (--doto (make-sparse-keymap)
     (define-key it (kbd "C-c C-c") #'counsel-edit-mode--confirm-commit))
-  "Keymap for `ag-edit-ediff-mode'")
+  "Keymap for `counsel-edit-ediff-mode'")
 
 ;;;###autoload
 (defun counsel-edit-mode-setup-ivy ()
@@ -146,23 +148,23 @@ When this is set non-nil, `ag-edit-mode` will confirm commits with showing the c
   (when counsel-edit-mode
     (when (buffer-file-name)
       (counsel-edit-mode -1)
-      (user-error "Ag Edit Mode must be initialized in a non file visiting buffer."))
+      (user-error "Ag Edit Mode must be initialized in a non file visiting buffer"))
     (unless counsel-edit-mode--formatted-buffer
       (counsel-edit-mode--format-buffer)
       (when counsel-edit-mode-expand-braces-by-default (counsel-edit-mode-expand-all)))
     (setq-local after-change-functions (append (list #'counsel-edit-mode--after-change-fix-overlays) after-change-functions nil))
     (setq-local revert-buffer-function #'counsel-edit-mode--revert-buffer)))
 
-(define-minor-mode ag-edit-ediff-mode
+(define-minor-mode counsel-edit-ediff-mode
   "Special mode for ediff buffers for use with `counsel-edit-mode'."
   nil
   " Ag-Ediff"
-  ag-edit-ediff-mode-map)
+  counsel-edit-mode-ediff-mode-map)
 
-(defvar-local ag-edit-ediff-mode--target-buffer nil
+(defvar-local counsel-edit-ediff-mode--target-buffer nil
   "Target buffer used with ediff.")
 
-(defvar-local ag-edit-ediff-mode--temp-buffer nil
+(defvar-local counsel-edit-ediff-mode--temp-buffer nil
   "Temporary buffer used with ediff.")
 
 (defun counsel-edit-mode-ediff-changes ()
@@ -171,13 +173,13 @@ Use `counsel-edit-mode--confirm-commit' to commit from the ediff control buffer.
 "
   (interactive)
   (let ((target-buffer (current-buffer))
-        (temp-buffer (ag-edit-ediff-mode--generate-original-text-buffer)))
+        (temp-buffer (counsel-edit-ediff-mode--generate-original-text-buffer)))
     (ediff-buffers temp-buffer (current-buffer)
                    (list (lambda ()
-                           (ag-edit-ediff-mode 1)
+                           (counsel-edit-ediff-mode 1)
                            (add-hook 'ediff-quit-hook (lambda () (kill-buffer temp-buffer)) nil t)
-                           (setq ag-edit-ediff-mode--target-buffer target-buffer)
-                           (setq ag-edit-ediff-mode--temp-buffer temp-buffer))))))
+                           (setq counsel-edit-ediff-mode--target-buffer target-buffer)
+                           (setq counsel-edit-ediff-mode--temp-buffer temp-buffer))))))
 
 
 (defun counsel-edit-mode-change-major-mode (new-major-mode)
@@ -186,7 +188,7 @@ This handles preserving the `counsel-edit-mode' state correctly so should be use
 instead of directly calling the major-mode functions.
 "
   (interactive "C")
-  (unless counsel-edit-mode (user-error "Can only call `counsel-edit-mode-change-major-mode' in `counsel-edit-mode' buffers."))
+  (unless counsel-edit-mode (user-error "Can only call `counsel-edit-mode-change-major-mode' in `counsel-edit-mode' buffers"))
   (let ((formatted-buffer counsel-edit-mode--formatted-buffer)
         (sections counsel-edit-mode--section-overlays))
     (funcall-interactively new-major-mode)
@@ -217,7 +219,7 @@ instead of directly calling the major-mode functions.
 (defun counsel-edit-mode-commit ()
   "Commit the changes in the `counsel-edit-mode' buffer."
   (interactive)
-  (unless counsel-edit-mode (user-error "Will only commit `counsel-edit-mode' buffers."))
+  (unless counsel-edit-mode (user-error "Will only commit `counsel-edit-mode' buffers"))
   (if counsel-edit-mode-confirm-commits
       (counsel-edit-mode-ediff-changes)
     (counsel-edit-mode--confirm-commit)))
@@ -225,15 +227,15 @@ instead of directly calling the major-mode functions.
 (defun counsel-edit-mode-quit ()
   "Discard the changes in the `counsel-edit-mode' buffer."
   (interactive)
-  (unless counsel-edit-mode (user-error "Will only quit `counsel-edit-mode' buffers."))
+  (unless counsel-edit-mode (user-error "Will only quit `counsel-edit-mode' buffers"))
   (when (and counsel-edit-mode-confirm-commits (not (y-or-n-p "Really discard changes?")))
-    (user-error "Discard changes cancelled."))
+    (user-error "Discard changes cancelled"))
   (kill-buffer (current-buffer)))
 
 (defun counsel-edit-mode-goto ()
   "Goto the line that will be replaced with the one at point in the `counsel-edit-mode buffer'"
   (interactive)
-  (unless counsel-edit-mode (user-error "Will only goto in `counsel-edit-mode' buffers."))
+  (unless counsel-edit-mode (user-error "Will only goto in `counsel-edit-mode' buffers"))
   (-let (((&plist :file-name :line-number) (overlay-get (counsel-edit-mode--prev-overlay-for-section) 'metadata)))
     (find-file file-name)
     (goto-char (point-min))
@@ -247,7 +249,7 @@ instead of directly calling the major-mode functions.
     (goto-char (point-min))
     (counsel-edit-mode--add-context-lines-in-contiguous-section)
     (redisplay)
-    (while (< (point) (point-max))
+    (while (not (eobp))
       (forward-line 1)
       (counsel-edit-mode--add-context-lines-in-contiguous-section)
       (redisplay))))
@@ -264,7 +266,7 @@ instead of directly calling the major-mode functions.
   (save-excursion
     (cl-loop for i from 0 below (or arg 1) do
              (-let [(&plist :file-name :line-number) (counsel-edit-mode--prev-missing-line)]
-               (when (<= (1- line-number) 0) (user-error "Can't expand past file start."))
+               (when (<= (1- line-number) 0) (user-error "Can't expand past file start"))
                (counsel-edit-mode--insert-overlay file-name (1- line-number))))))
 
 (defun counsel-edit-mode-expand-context-down (arg)
@@ -278,13 +280,13 @@ instead of directly calling the major-mode functions.
 (defun counsel-edit-mode--confirm-commit ()
   "Commit the changes in the `counsel-edit-mode' buffer."
   (interactive)
-  (when ag-edit-ediff-mode--target-buffer
-    (let ((target-buffer ag-edit-ediff-mode--target-buffer)
-          (temp-buffer ag-edit-ediff-mode--temp-buffer))
+  (when counsel-edit-ediff-mode--target-buffer
+    (let ((target-buffer counsel-edit-ediff-mode--target-buffer)
+          (temp-buffer counsel-edit-ediff-mode--temp-buffer))
       (ediff-really-quit nil)
       (kill-buffer temp-buffer)
       (set-buffer target-buffer)))
-  (unless counsel-edit-mode (user-error "Will only commit `counsel-edit-mode' buffers."))
+  (unless counsel-edit-mode (user-error "Will only commit `counsel-edit-mode' buffers"))
   (counsel-edit-mode--validate-section-overlays)
   (-let* ((start-buffer (current-buffer))
           (modified-buffers (ht))
@@ -297,7 +299,7 @@ instead of directly calling the major-mode functions.
                               :start-overlay
                               :metadata (&plist :original-text :file-name :line-number)) transformation]
                  (unless (and (string= original-text (s-chop-suffix "\n" replacement-text))
-                              (not (overlay-get start-overlay 'ag-edit-deleted)))
+                              (not (overlay-get start-overlay 'counsel-edit-deleted)))
                    (with-current-buffer (or (find-buffer-visiting file-name)
                                             (find-file-noselect file-name))
                      (save-excursion
@@ -313,9 +315,9 @@ instead of directly calling the major-mode functions.
 Expected: " original-text "
 Actual: " text "
 Continue?"))))
-                           (user-error "Text changed since lookup.")))
+                           (user-error "Text changed since lookup")))
                        (delete-region (point) (save-excursion (end-of-line) (point)))
-                       (if (overlay-get start-overlay 'ag-edit-deleted) (delete-char 1)
+                       (if (overlay-get start-overlay 'counsel-edit-deleted) (delete-char 1)
                          (insert (s-chop-suffix "\n" replacement-text)))))))))
     (cl-loop for buffer in (ht-keys modified-buffers)
              do (with-current-buffer buffer (undo-boundary) (save-buffer)))
@@ -324,7 +326,7 @@ Continue?"))))
     (kill-buffer start-buffer)))
 
 (defun counsel-edit-mode--add-context-lines-in-contiguous-section ()
-  (unless counsel-edit-mode (user-error "Will only goto in `counsel-edit-mode' buffers."))
+  (unless counsel-edit-mode (user-error "Will only goto in `counsel-edit-mode' buffers"))
   (cl-loop while
            (let ((mismatched (-some--> (cons (counsel-edit-mode--contiguous-section-start) (counsel-edit-mode--contiguous-section-end))
                                (and (car it) (cdr it) it)
@@ -334,7 +336,7 @@ Continue?"))))
                    (pcase mismatched
                      ((or ?\} ?\) ?\])
                       (-let [(&plist :file-name :line-number) (counsel-edit-mode--prev-missing-line)]
-                        (when (<= (1- line-number) 0) (user-error "Missing matching delimiter."))
+                        (when (<= (1- line-number) 0) (user-error "Missing matching delimiter"))
                         (counsel-edit-mode--insert-overlay file-name (1- line-number))
                         t))
                      ((or ?\{ ?\( ?\[)
@@ -350,7 +352,7 @@ Continue?"))))
                                       (error-message-string err)) nil)))))
   (-some--> (counsel-edit-mode--contiguous-section-end) (goto-char it)))
 
-(defun ag-edit--matching-delimiter (delimiter)
+(defun counsel-edit-mode--matching-delimiter (delimiter)
   "Return the matching delimiter for PAREN"
   (pcase delimiter
     (?\] ?\[)
@@ -377,16 +379,15 @@ Continue?"))))
           ('start-lisp-char-literal
            (pcase (char-after (point))
              (?\\ (setq state 'lisp-char-literal))
-             (_ (setq state 'normal)))
-           )
+             (_ (setq state 'normal))))
           ('normal
            (pcase (char-after (point))
              (?\? (setq state 'start-lisp-char-literal))
              (?\" (setq state 'string))
              ((or ?\} ?\) ?\])
-              (when (not stack) (cl-return (char-after (point))))
+              (unless stack (cl-return (char-after (point))))
               (when (eq (char-after (point))
-                        (ag-edit--matching-delimiter (caar stack)))
+                        (counsel-edit-mode--matching-delimiter (caar stack)))
                 (pop stack)))
 
              ((or ?\{ ?\( ?\[)
@@ -403,9 +404,10 @@ Continue?"))))
           (start-file file-name))
     (forward-line -1)
     (cl-loop
-     while (not (or done (eq (point) (point-min)))) 
+     while (not (or done (bobp))) 
      do
-     (-let (((loop-metadata &as &plist :file-name loop-file-name :line-number loop-number) (-some--> (counsel-edit-mode--prev-overlay-for-section) (overlay-get it 'metadata))))
+     (-let (((loop-metadata &as &plist :file-name loop-file-name :line-number loop-number)
+             (-some--> (counsel-edit-mode--prev-overlay-for-section) (overlay-get it 'metadata))))
        (if (or (not (string= loop-file-name start-file))
                (not (eq loop-number (1- last-line-number))))
            (progn (forward-line 1)
@@ -423,9 +425,10 @@ Continue?"))))
           (start-file file-name))
     (forward-line 1)
     (cl-loop
-     while (not (or done (eq (point) (point-max)))) 
+     while (not (or done (eobp))) 
      do
-     (-let (((loop-metadata &as &plist :file-name loop-file-name :line-number loop-number) (-some--> (counsel-edit-mode--prev-overlay-for-section) (overlay-get it 'metadata))))
+     (-let (((loop-metadata &as &plist :file-name loop-file-name :line-number loop-number)
+             (-some--> (counsel-edit-mode--prev-overlay-for-section) (overlay-get it 'metadata))))
        (if (or (not (string= loop-file-name start-file))
                (not (eq loop-number (1+ last-line-number))))
            (progn (forward-line -1)
@@ -445,9 +448,9 @@ Returns `nil' for the last section in the buffer."
       (while (and (not overlay) (not at-pt-min))
         (setq overlay
               (--first
-               (overlay-get it 'ag-edit-overlay)
+               (overlay-get it 'counsel-edit-overlay)
                (overlays-in (point) (point))))
-        (if (eq (point) (point-min)) (setq at-pt-min t)
+        (if (bobp) (setq at-pt-min t)
           (forward-char -1)))
       overlay)))
 
@@ -456,11 +459,11 @@ Returns `nil' for the last section in the buffer."
 Returns `nil' for the last section in the buffer."
   (-let ((overlay nil))
     (save-excursion
-      (unless (eq (point-max) (point)) (forward-char 1))
+      (unless (eobp) (forward-char 1))
       (while (and (not overlay) (< (point) (point-max)))
         (setq overlay
               (--first
-               (overlay-get it 'ag-edit-overlay)
+               (overlay-get it 'counsel-edit-overlay)
                (overlays-in (point)
                             (point))))
         (forward-char 1))
@@ -506,7 +509,7 @@ Returns `nil' for the last section in the buffer."
                                     (goto-char (point-min))
                                     (forward-line (1- line-number))
                                     (when (< (line-number-at-pos (point)) line-number)
-                                      (user-error "Line Number after the end of file."))
+                                      (user-error "Line Number after the end of file"))
                                     (buffer-substring (point) (save-excursion (end-of-line) (point))))))
                  (metadata (list :file-name file-name
                                  :original-text original-text
@@ -532,26 +535,29 @@ Returns `nil' for the last section in the buffer."
                             counsel-edit-mode--section-overlays
                             (cons
                              (list
-                              :overlay (--doto (counsel-edit-mode--make-line-details-overlay (point) original-text metadata 'counsel-edit-mode-expanded-context-overlay)
-                                         (overlay-put it 'ag-edit-order 0))
+                              :overlay (--doto (counsel-edit-mode--make-line-details-overlay
+                                                (point)
+                                                original-text metadata
+                                                'counsel-edit-mode-expanded-context-overlay)
+                                         (overlay-put it 'counsel-edit-order 0))
                               :metadata metadata)
                              (--map (prog1 it
                                       (overlay-put (plist-get it :overlay)
-                                                   'ag-edit-order
-                                                   (1+ (or (overlay-get (plist-get it :overlay) 'ag-edit-order)
+                                                   'counsel-edit-order
+                                                   (1+ (or (overlay-get (plist-get it :overlay) 'counsel-edit-order)
                                                            0))))
                                     counsel-edit-mode--section-overlays)))))
                         ((or target-is-next-overlay-p
                              (not has-next-overlay-p))
                          (prog1 t
                            (cl-loop for overlay in (cdr overlays)
-                                    do (overlay-put (plist-get overlay :overlay) 'ag-edit-order (1+ (overlay-get (plist-get overlay :overlay)
-                                                                                                            'ag-edit-order))))
+                                    do (overlay-put (plist-get overlay :overlay) 'counsel-edit-order (1+ (overlay-get (plist-get overlay :overlay)
+                                                                                                            'counsel-edit-order))))
                            (setcdr overlays (cons (list
                                                    :overlay (--doto (counsel-edit-mode--make-line-details-overlay (point) original-text metadata 'counsel-edit-mode-expanded-context-overlay)
                                                               (overlay-put it
-                                                                           'ag-edit-order
-                                                                           (or (-some--> (overlay-get (plist-get (car overlays) :overlay) 'ag-edit-order)
+                                                                           'counsel-edit-order
+                                                                           (or (-some--> (overlay-get (plist-get (car overlays) :overlay) 'counsel-edit-order)
                                                                                  (1+ it))
                                                                                0)))
                                                    :metadata metadata)
@@ -582,7 +588,7 @@ Returns `nil' for the last section in the buffer."
                    (when after-overlay-line-number
                      (-let [(plist &as &plist :overlay next-overlay :metadata (&plist :file-name next-file-name :line-number next-line-number) ) (cadr list)]
                        (setq after-overlay-line-number line-number)
-                       (when (not plist)
+                       (unless plist
                          (cl-return (point-max)))
                        (when (or (not (string= next-file-name file-name))
                                  (< 1 (abs (- after-overlay-line-number next-line-number))))
@@ -627,7 +633,7 @@ Returns `nil' for the last section in the buffer."
                           (goto-char (point-min))
                           (forward-line (1- line-number))
                           (when (< (line-number-at-pos (point)) line-number)
-                            (error "Line Number after the end of file."))
+                            (error "Line Number after the end of file"))
                           (buffer-substring (point) (save-excursion (end-of-line) (point)))))))
                  (overlay-put overlay 'original-text original-text)
                  (setcar overlays
@@ -656,7 +662,7 @@ Returns `nil' for the last section in the buffer."
 
 (defun counsel-edit-mode--format-buffer ()
   "Formats the counsel-edit-mode buffer. Is a no-op if run multiple times in a `counsel-edit-mode' buffer."
-  (unless counsel-edit-mode (user-error "Will only format `counsel-edit-mode' buffers."))
+  (unless counsel-edit-mode (user-error "Will only format `counsel-edit-mode' buffers"))
   (unless counsel-edit-mode--formatted-buffer
     (delete-all-overlays)
     (goto-char (point-max))
@@ -697,12 +703,12 @@ Returns `nil' for the last section in the buffer."
                     (cons
                      (list
                       :overlay (--doto (counsel-edit-mode--make-line-details-overlay section-start original-text metadata)
-                                 (overlay-put it 'ag-edit-order 0))
+                                 (overlay-put it 'counsel-edit-order 0))
                       :metadata metadata)
                      (--map (prog1 it
                               (overlay-put (plist-get it :overlay)
-                                           'ag-edit-order
-                                           (1+ (overlay-get (plist-get it :overlay) 'ag-edit-order))))
+                                           'counsel-edit-order
+                                           (1+ (overlay-get (plist-get it :overlay) 'counsel-edit-order))))
                             counsel-edit-mode--section-overlays)))
                    (goto-char section-end)
                    ;;(insert " ")
@@ -714,15 +720,15 @@ Returns `nil' for the last section in the buffer."
 
 (defun counsel-edit-mode--validate-section-overlays ()
   (-let ((overlay-start-ordered-list (->> counsel-edit-mode--section-overlays
-                                          (--map (cons (overlay-start (plist-get it :overlay)) (overlay-get (plist-get it :overlay) 'ag-edit-order)))
+                                          (--map (cons (overlay-start (plist-get it :overlay)) (overlay-get (plist-get it :overlay) 'counsel-edit-order)))
                                           (--sort (< (car it) (car other)))
                                           (--map (cdr it)))))
-    (when (not (equal overlay-start-ordered-list (cl-loop for i upfrom 0 below (length overlay-start-ordered-list) collect i)))
+    (unless (equal overlay-start-ordered-list (cl-loop for i upfrom 0 below (length overlay-start-ordered-list) collect i))
       (unless (y-or-n-p "Overlays are not sorted correctly. This buffer might be dangerous to use for substitution. Continue?")
         (user-error "Overlays are not sorted correctly. This buffer might be dangerous to use for substitution. %S"
                overlay-start-ordered-list)))))
 
-(defun ag-edit-ediff-mode--generate-original-text-buffer ()
+(defun counsel-edit-ediff-mode--generate-original-text-buffer ()
   (-let  ((overlays counsel-edit-mode--section-overlays)
           (text (buffer-string))
           (start-major-mode major-mode))
@@ -754,7 +760,7 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
                          (propertize (concat " " file-name ":" (number-to-string line-number) " ") 'face (or face 'counsel-edit-mode-overlay))
                          " ")))
       (--doto (make-overlay pt pt (current-buffer) t nil)
-        (overlay-put it 'ag-edit-overlay t)
+        (overlay-put it 'counsel-edit-overlay t)
         (overlay-put it 'metadata metadata)
         (overlay-put it 'original-text original-text)
         ;;(overlay-put it 'insert-in-front-hooks '(counsel-edit-mode--after-change-fix-overlays))
@@ -772,7 +778,7 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
                                 ('counsel-edit-mode-expanded-context-overlay 'counsel-edit-mode-expanded-context-overlay-deleted)
                                 (unknown (error "Unknown face at position %s" unknown)))))
             (add-text-properties 1 (- (length it) 2) `(face ,deleted-face) it)))
-        (overlay-put overlay 'ag-edit-deleted t)
+        (overlay-put overlay 'counsel-edit-deleted t)
         (goto-char (overlay-start overlay))
         (delete-char (- (or end (point-max)) (overlay-start overlay)))))
     (goto-char (overlay-start overlay))))
@@ -783,7 +789,7 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
     (save-excursion
       (-let ((end (-some--> (counsel-edit-mode--next-overlay-for-section) (overlay-start it))))
         (goto-char (overlay-start section-overlay))
-        (overlay-put section-overlay 'ag-edit-deleted nil)
+        (overlay-put section-overlay 'counsel-edit-deleted nil)
         (--doto (overlay-get section-overlay 'before-string)
           (add-text-properties 1 (- (length it) 2) `(face ,(get-text-property 0 'face it)) it))
         (delete-char (- (or end (point-max)) (overlay-start section-overlay)))
@@ -805,9 +811,9 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
   (save-excursion
     (-let ((overlays (->> (overlays-in (save-excursion (goto-char beg) (forward-line 0) (max (point-min) (1- (point))))
                                        (save-excursion (goto-char beg) (end-of-line) (min (point-max) (1+ (point)))))
-                          (--filter (overlay-get it 'ag-edit-order))
-                          (--sort (< (overlay-get it 'ag-edit-order) (overlay-get other 'ag-edit-order))))))
-      (when (not overlays)
+                          (--filter (overlay-get it 'counsel-edit-order))
+                          (--sort (< (overlay-get it 'counsel-edit-order) (overlay-get other 'counsel-edit-order))))))
+      (unless overlays
         (goto-char beg)
         (let ((overlay (counsel-edit-mode--prev-overlay-for-section)))
           (when overlay
@@ -824,10 +830,10 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
                  (-let* ((start (overlay-start overlay))
                          (delimiter (or (char-before start) ?\n))
                          (other-overlays (->> (overlays-in start start)
-                                              (--filter (and (overlay-get it 'ag-edit-order)
+                                              (--filter (and (overlay-get it 'counsel-edit-order)
                                                              (not (eq overlay it)))))))
                    (goto-char start)
-                   (when (not (eq delimiter ?\n)) 
+                   (unless (eq delimiter ?\n) 
                      (goto-char start)
                      (insert "\n")
                      (-let [new-pt (1+ (point))]
