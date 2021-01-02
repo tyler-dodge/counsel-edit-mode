@@ -5,9 +5,19 @@
 
 ---
 
+# Features
+* Edit search results from multiple files at once.
+* Expand the search result context so that all matching delimiters are matched. This allows
+for structural editing on search output.
+* Ediff support for viewing changes made in the `counsel-edit-mode` bufffer.
+
+# Screenshot
+
+![counsel-edit-mode](screenshot/Usage.gif)
+
 # Overview
 
-This provides an action for use with 
+This provides an action that allows editing files in place for use with 
 `counsel-ag`, `counsel-rg`, `counsel-git-grep`, `counsel-ack`, and `counsel-grep`.
 
 It can be installed with:
@@ -18,16 +28,6 @@ It can be installed with:
 # Installation 
 
 Comin Soon to Melpa!
-
-# Features
-* Edit search results from multiple files at once.
-* Expand the search result context so that all matching delimiters are matched. This allows
-for structural editing on search output.
-* Ediff support for viewing changes made in the `counsel-edit-mode` bufffer.
-
-# Screenshot
-
-![counsel-edit-mode](screenshot/Usage.gif)
 
 # Usage
 
