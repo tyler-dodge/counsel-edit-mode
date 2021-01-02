@@ -28,7 +28,7 @@ for structural editing on search output.
 # Usage
 
 Once installed, run any of the counsel search commands. Once they start returning results, 
-type `M-o e` to open up the `counsel-edit-mode` buffer to edit the results.
+type <kbd>M-o e</kbd> to open up the `counsel-edit-mode` buffer to edit the results.
 
 # Customization
 

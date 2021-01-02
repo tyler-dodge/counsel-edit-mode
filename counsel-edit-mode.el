@@ -141,6 +141,7 @@ Mainly exists for counsel-grep compatibility")
   (let ((start-buffer (current-buffer)))
     (-some--> (with-current-buffer (generate-new-buffer "*ag-edit*")
                 (let ((buffer (current-buffer)))
+                  (display-buffer buffer)
                   (condition-case _
                       (save-excursion
                         (insert (shell-command-to-string (--> counsel--async-last-command
@@ -149,9 +150,7 @@ Mainly exists for counsel-grep compatibility")
                         (funcall counsel-edit-mode-major-mode)
                         (setq-local counsel-edit-mode--start-buffer start-buffer)
                         (counsel-edit-mode 1)
-                        buffer)
-                    (quit (kill-buffer buffer)
-                          nil))))
+                        buffer))))
       (prog1 it (display-buffer it)))))
 
 (define-minor-mode counsel-edit-mode
