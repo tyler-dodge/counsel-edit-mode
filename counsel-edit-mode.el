@@ -662,15 +662,7 @@ Returns `nil' for the last section in the buffer."
     (goto-char (point-max))
     (let ((inhibit-read-only t)
           (addresses (ht)))
-      (cl-loop while (re-search-backward (rx  line-start
-                                              (zero-or-one (group-n 1 (* (not ":")))
-                                                          ":")
-                                             (group-n 2 (* (not ":")))
-                                             ":"
-                                             (zero-or-one
-                                              (group-n 3 (* (not ":")) ":"))
-                                             
-                                             (group-n 4 (* (not "\n")) line-end))
+      (cl-loop while (re-search-backward counsel-edit-mode--line-regexp
                                          nil t)
                collect
                (let* ((file-name (or (-some--> (match-string 1)
