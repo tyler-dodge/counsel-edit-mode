@@ -8,8 +8,6 @@ cache:
   - directories:
       # Cache stable Emacs binaries (saves 1min per job)
       - "$HOME/emacs/"
-# Allow Emacs snapshot builds to fail and don’t wait for these as they can take
-# a looooong time
 matrix:
   fast_finish: true
 env:

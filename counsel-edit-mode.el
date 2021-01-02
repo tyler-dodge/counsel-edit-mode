@@ -640,6 +640,20 @@ Returns `nil' for the last section in the buffer."
         (counsel-edit-mode--undo-line)))
     (goto-char (overlay-start start-overlay))))
 
+
+  ;; (rx  line-start
+  ;;      (zero-or-one (group-n 1 (* (not ":")))
+  ;;                   ":")
+  ;;      (group-n 2 (* (not ":")))
+  ;;      ":"
+  ;;      (zero-or-one
+  ;;       (group-n 3 (* (not ":")) ":"))
+       
+  ;;      (group-n 4 (* (not "\n")) line-end))
+(defvar counsel-edit-mode--line-regexp
+  "^\\(?:\\(?1:[^:]*\\):\\)?\\(?2:[^:]*\\):\\(?3:[^:]*:\\)?\\(?4:.*$\\)"
+  "See comment near definition for generating (rx).")
+
 (defun counsel-edit-mode--format-buffer ()
   "Formats the counsel-edit-mode buffer. Is a no-op if run multiple times in a `counsel-edit-mode' buffer."
   (unless counsel-edit-mode (user-error "Will only format `counsel-edit-mode' buffers."))
