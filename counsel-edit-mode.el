@@ -39,7 +39,7 @@
 
 (defcustom counsel-edit-mode-major-mode
   'prog-mode
-  "The default major-mode used by the `counsel-edit-mode` buffer.
+  "The default `major-mode' used by the `counsel-edit-mode` buffer.
 This can be changed per `counsel-edit-mode` buffer
 by calling `counsel-edit-mode-change-major-mode` in that buffer."
   :type 'function
@@ -49,10 +49,12 @@ by calling `counsel-edit-mode-change-major-mode` in that buffer."
   nil
   "When non-nil, expand the entire buffer at start.
 
-When this is set non-nil, `counsel-edit-mode' will expand the context of each file
-until all matching delimiters are closed.
-This can be done manually per section by calling `counsel-edit-mode-expand-section'.
-If `counsel-edit-mode-expand-section' is called with a prefix arg,
+When this is set non-nil, `counsel-edit-mode' will expand the context of each
+file until all matching delimiters are closed.
+This can be done manually per section by calling
+\\[counsel-edit-mode-expand-section].
+
+If \\[counsel-edit-mode-expand-section] is called with a prefix arg,
 it will expand every section in the buffer."
   :type 'boolean
   :group 'counsel-edit)
@@ -849,8 +851,8 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
       (when (> (point) region-start)
         (forward-char -1)))))
 
-(defun counsel-edit-mode--after-change-fix-overlays (beg end &rest _)
-  "Fix the overlays between BEG and END so that the invariants stay true."
+(defun counsel-edit-mode--after-change-fix-overlays (beg &rest _)
+  "Fix the overlays starting at BEG so that the invariants stay true."
   (save-excursion
     (-let ((overlays (->> (overlays-in (save-excursion (goto-char (1- beg)) (forward-line 0) (max (point-min) (1- (point))))
                                        (save-excursion (goto-char (1+ beg)) (end-of-line) (min (point-max) (1+ (point)))))
