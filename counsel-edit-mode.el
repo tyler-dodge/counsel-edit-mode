@@ -228,7 +228,7 @@ instead of directly calling the major-mode functions.
   "Discard the changes in the `counsel-edit-mode' buffer."
   (interactive)
   (unless counsel-edit-mode (user-error "Will only quit `counsel-edit-mode' buffers"))
-  (when (and counsel-edit-mode-confirm-commits (not (y-or-n-p "Really discard changes?")))
+  (when (and counsel-edit-mode-confirm-commits (not (y-or-n-p "Really discard changes? ")))
     (user-error "Discard changes cancelled"))
   (kill-buffer (current-buffer)))
 
@@ -314,7 +314,7 @@ instead of directly calling the major-mode functions.
                                     (not (y-or-n-p (concat "Text changed since lookup.
 Expected: " original-text "
 Actual: " text "
-Continue?"))))
+Continue? "))))
                            (user-error "Text changed since lookup")))
                        (delete-region (point) (save-excursion (end-of-line) (point)))
                        (if (overlay-get start-overlay 'counsel-edit-deleted) (delete-char 1)
@@ -460,7 +460,7 @@ Returns `nil' for the last section in the buffer."
   (-let ((overlay nil))
     (save-excursion
       (unless (eobp) (forward-char 1))
-      (while (and (not overlay) (< (point) (point-max)))
+      (while (and (not overlay) (not (eobp)))
         (setq overlay
               (--first
                (overlay-get it 'counsel-edit-overlay)
@@ -554,10 +554,17 @@ Returns `nil' for the last section in the buffer."
                                     do (overlay-put (plist-get overlay :overlay) 'counsel-edit-order (1+ (overlay-get (plist-get overlay :overlay)
                                                                                                             'counsel-edit-order))))
                            (setcdr overlays (cons (list
-                                                   :overlay (--doto (counsel-edit-mode--make-line-details-overlay (point) original-text metadata 'counsel-edit-mode-expanded-context-overlay)
+                                                   :overlay (--doto (counsel-edit-mode--make-line-details-overlay
+                                                                     (point)
+                                                                     original-text
+                                                                     metadata
+                                                                     'counsel-edit-mode-expanded-context-overlay)
                                                               (overlay-put it
                                                                            'counsel-edit-order
-                                                                           (or (-some--> (overlay-get (plist-get (car overlays) :overlay) 'counsel-edit-order)
+                                                                           (or (-some-->
+                                                                                   (car overlays)
+                                                                                 (plist-get it :overlay)
+                                                                                   (overlay-get it 'counsel-edit-order)
                                                                                  (1+ it))
                                                                                0)))
                                                    :metadata metadata)
@@ -586,7 +593,10 @@ Returns `nil' for the last section in the buffer."
                    (when (eq start-overlay overlay)
                      (setq after-overlay-line-number line-number))
                    (when after-overlay-line-number
-                     (-let [(plist &as &plist :overlay next-overlay :metadata (&plist :file-name next-file-name :line-number next-line-number) ) (cadr list)]
+                     (-let [(plist &as &plist
+                                   :overlay next-overlay
+                                   :metadata (&plist :file-name next-file-name
+                                                     :line-number next-line-number) ) (cadr list)]
                        (setq after-overlay-line-number line-number)
                        (unless plist
                          (cl-return (point-max)))
@@ -720,11 +730,12 @@ Returns `nil' for the last section in the buffer."
 
 (defun counsel-edit-mode--validate-section-overlays ()
   (-let ((overlay-start-ordered-list (->> counsel-edit-mode--section-overlays
-                                          (--map (cons (overlay-start (plist-get it :overlay)) (overlay-get (plist-get it :overlay) 'counsel-edit-order)))
+                                          (--map (cons (overlay-start (plist-get it :overlay))
+                                                       (overlay-get (plist-get it :overlay) 'counsel-edit-order)))
                                           (--sort (< (car it) (car other)))
                                           (--map (cdr it)))))
     (unless (equal overlay-start-ordered-list (cl-loop for i upfrom 0 below (length overlay-start-ordered-list) collect i))
-      (unless (y-or-n-p "Overlays are not sorted correctly. This buffer might be dangerous to use for substitution. Continue?")
+      (unless (y-or-n-p "Overlays are not sorted correctly. This buffer might be dangerous to use for substitution. Continue? ")
         (user-error "Overlays are not sorted correctly. This buffer might be dangerous to use for substitution. %S"
                overlay-start-ordered-list)))))
 
@@ -757,7 +768,8 @@ Returns `nil' for the last section in the buffer."
 FACE defaults to `counsel-edit-mode-overlay' if nil."
   (-let [(&plist :file-name :line-number) metadata]
     (let ((overlay-text (concat
-                         (propertize (concat " " file-name ":" (number-to-string line-number) " ") 'face (or face 'counsel-edit-mode-overlay))
+                         (propertize (concat " " file-name ":" (number-to-string line-number) " ")
+                                     'face (or face 'counsel-edit-mode-overlay))
                          " ")))
       (--doto (make-overlay pt pt (current-buffer) t nil)
         (overlay-put it 'counsel-edit-overlay t)
