@@ -27,8 +27,6 @@ before_install:
   - make -f emacs-travis.mk install_gnutls
   - make -f emacs-travis.mk install_emacs
   - make -f emacs-travis.mk install_cask
-  # Install Texinfo, if you need to build info manuals for your project
-  - make -f emacs-travis.mk install_texinfo
 install:
   # Install your dependencies
   - cask install

@@ -5,6 +5,7 @@
                (f-exists-p "test"))
     (setq default-directory (f-join default-directory "test")))
   (setq test-directory (f-join default-directory "build/test-files"))
+  (mkdir test-directory t)
   (f-delete test-directory t)
   (mkdir test-directory t)
   (cl-loop for file in file-list
