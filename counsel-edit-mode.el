@@ -39,15 +39,18 @@
 
 (defcustom counsel-edit-mode-major-mode
   'prog-mode
-  "The default major-mode used by the
-`counsel-edit-mode` buffer. This can be changed per `counsel-edit-mode` buffer
+  "The default major-mode used by the `counsel-edit-mode` buffer.
+This can be changed per `counsel-edit-mode` buffer
 by calling `counsel-edit-mode-change-major-mode` in that buffer."
   :type 'function
   :group 'counsel-edit)
 
 (defcustom counsel-edit-mode-expand-braces-by-default
   nil
-  "When this is set non-nil, `counsel-edit-mode' will expand the context of each file until all matching delimeters are closed.
+  "When non-nil, expand the entire buffer at start.
+
+When this is set non-nil, `counsel-edit-mode' will expand the context of each file
+until all matching delimiters are closed.
 This can be done manually per section by calling `counsel-edit-mode-expand-section'.
 If `counsel-edit-mode-expand-section' is called with a prefix arg,
 it will expand every section in the buffer."
@@ -56,8 +59,9 @@ it will expand every section in the buffer."
 
 (defcustom counsel-edit-mode-confirm-commits
   nil
-  "The default major-mode used by the
-When this is set non-nil, `counsel-edit-mode` will confirm commits with showing the changes in ediff. 
+  "The default `major-mode' used by the
+When this is set non-nil, `counsel-edit-mode` will confirm commits
+with showing the changes in ediff.
 
 \\[counsel-edit-mode--confirm-commit] confirms the changes in ediff.
 
@@ -126,7 +130,7 @@ When this is set non-nil, `counsel-edit-mode` will confirm commits with showing 
   "Boolean indicating that this buffer has already been formatted.")
 
 (defvar-local counsel-edit-mode--start-buffer nil
-  "Buffer that the counsel-edit-mode-action was invoked from. 
+  "Buffer that the counsel-edit-mode-action was invoked from.
 Mainly exists for counsel-grep compatibility")
 
 (defun counsel-edit-mode-ivy-action (&rest _)
@@ -189,9 +193,9 @@ Use `counsel-edit-mode--confirm-commit' to commit from the ediff control buffer.
 
 
 (defun counsel-edit-mode-change-major-mode (new-major-mode)
-  "Change the major mode of the ag-edit buffer to MAJOR-MODE. 
-This handles preserving the `counsel-edit-mode' state correctly so should be used 
-instead of directly calling the major-mode functions."
+  "Change the `major-mode' of the ag-edit buffer to NEW-MAJOR-MODE.
+This handles preserving the `counsel-edit-mode' state correctly so
+should be used instead of directly calling the `major-mode' functions."
   (interactive "C")
   (unless counsel-edit-mode (user-error "Can only call `counsel-edit-mode-change-major-mode' in `counsel-edit-mode' buffers"))
   (let ((formatted-buffer counsel-edit-mode--formatted-buffer)
@@ -366,7 +370,7 @@ Continue? "))))
     (?\] ?\[)
     (?\) ?\()
     (?\} ?\{)
-    
+
     (?\[ ?\])
     (?\( ?\))
     (?\{ ?\})))
@@ -411,13 +415,13 @@ If a mismatch is found:
 
 (defun counsel-edit-mode--prev-missing-line-metadata ()
   "Return the metadata for the start of the current contiguous section."
-  (-let* ((section (counsel-edit-mode--prev-overlay-for-section))  
+  (-let* ((section (counsel-edit-mode--prev-overlay-for-section))
           ((last-metadata &as &plist :file-name :line-number last-line-number) (overlay-get section 'metadata))
           (done nil)
           (start-file file-name))
     (forward-line -1)
     (cl-loop
-     while (not (or done (bobp))) 
+     while (not (or done (bobp)))
      do
      (-let (((loop-metadata &as &plist :file-name loop-file-name :line-number loop-number)
              (-some--> (counsel-edit-mode--prev-overlay-for-section) (overlay-get it 'metadata))))
@@ -433,13 +437,13 @@ If a mismatch is found:
 
 (defun counsel-edit-mode--next-missing-line-metadata ()
   "Return the metadata for the end of the current contiguous section."
-  (-let* ((section (counsel-edit-mode--prev-overlay-for-section))  
+  (-let* ((section (counsel-edit-mode--prev-overlay-for-section))
           ((last-metadata &as &plist :file-name :line-number last-line-number) (overlay-get section 'metadata))
           (done nil)
           (start-file file-name))
     (forward-line 1)
     (cl-loop
-     while (not (or done (eobp))) 
+     while (not (or done (eobp)))
      do
      (-let (((loop-metadata &as &plist :file-name loop-file-name :line-number loop-number)
              (-some--> (counsel-edit-mode--prev-overlay-for-section) (overlay-get it 'metadata))))
@@ -454,7 +458,7 @@ If a mismatch is found:
      finally return last-metadata)))
 
 (defun counsel-edit-mode--prev-overlay-for-section ()
-  "Get the overlay for the start of the next section. 
+  "Get the overlay for the start of the next section.
 Returns nil for the last section in the buffer."
   (-let ((overlay nil)
          (at-pt-min nil))
@@ -469,7 +473,7 @@ Returns nil for the last section in the buffer."
       overlay)))
 
 (defun counsel-edit-mode--next-overlay-for-section ()
-  "Get the overlay for the start of the next section. 
+  "Get the overlay for the start of the next section.
 Returns nil for the last section in the buffer."
   (-let ((overlay nil))
     (save-excursion
@@ -484,7 +488,7 @@ Returns nil for the last section in the buffer."
       overlay)))
 
 (defun counsel-edit-mode--bounds-of-section ()
-  "Return a cons of the form (start of section . end of section)"
+  "Return a cons of the form (start of section . end of section)."
   (cons (overlay-start (counsel-edit-mode--prev-overlay-for-section))
         (or (-some--> (counsel-edit-mode--next-overlay-for-section)
               (overlay-start it))
@@ -683,7 +687,7 @@ Returns nil for the last section in the buffer."
   ;;      ":"
   ;;      (zero-or-one
   ;;       (group-n 3 (* (not ":")) ":"))
-       
+
   ;;      (group-n 4 (* (not "\n")) line-end))
 (defvar counsel-edit-mode--line-regexp
   "^\\(?:\\(?1:[^:]*\\):\\)?\\(?2:[^:]*\\):\\(?3:[^:]*:\\)?\\(?4:.*$\\)"
@@ -717,7 +721,7 @@ Returns nil for the last section in the buffer."
                                       :original-text original-text
                                       :line-number (string-to-number line-number)
                                       :column-number (-some--> column-number (string-to-number it)))))
-                 
+
                  (if (ht-get addresses dedupe-key)
                      (progn
                        (forward-line 0)
@@ -726,7 +730,7 @@ Returns nil for the last section in the buffer."
                                         `(metadata ,metadata))
                    (add-text-properties full-line-start section-start '(read-only t))
                    (ht-set addresses dedupe-key t)
-                   
+
                    (setq-local
                     counsel-edit-mode--section-overlays
                     (cons
@@ -788,7 +792,7 @@ Returns nil for the last section in the buffer."
   "Initialize a line details overlay at PT.
 
 The overlay will have the following properties:
-  `overlay-text' OVERLAY-TEXT
+  `original-text' ORIGINAL-TEXT
   `metadata' METADATA
 
 FACE defaults to `counsel-edit-mode-overlay' if nil."
@@ -872,7 +876,7 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
                                               (--filter (and (overlay-get it 'counsel-edit-order)
                                                              (not (eq overlay it)))))))
                    (goto-char start)
-                   (unless (eq delimiter ?\n) 
+                   (unless (eq delimiter ?\n)
                      (insert "\n")
                      (-let [new-pt (point)]
                        (--each (append (list overlay) other-overlays)
@@ -897,7 +901,7 @@ Does nothing if OVERLAY is not the overlay for the section between BEG and END."
     (goto-char beg)
     (when (and (< beg end) (eq (counsel-edit-mode--prev-overlay-for-section) overlay))
       (add-text-properties
-       beg 
+       beg
        (max beg end)
        `(line-prefix ,(propertize (s-center (1- (length (overlay-get overlay 'before-string))) " ! ")
                                   'face 'counsel-edit-mode-expanded-context-overlay))))))
