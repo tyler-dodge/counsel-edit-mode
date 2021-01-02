@@ -1,0 +1,3 @@
+(defun
+    TEST (
+      should-expand))
