@@ -30,6 +30,33 @@ for structural editing on search output.
 Once installed, run any of the counsel search commands. Once they start returning results, 
 type <kbd>M-o e</kbd> to open up the `counsel-edit-mode` buffer to edit the results.
 
+# Keymap
+
+## ag-edit-mode
+
+| Key           | Action                                            |
+|:--------------|:--------------------------------------------------|
+| `C-c C-c`     | Commit Changes                                    |
+| `C-c C-k`     | Discard Changes                                   |
+| `C-c C-l`     | Goto buffer referenced at line                    |
+| `C-c C-u`     | Undo modifications to current line                |
+| `C-c C-e`     | Expand current section for missing delimiters     |
+| `C-u C-c C-e` | Expand all files in buffer for missing delimiters |
+| `C-c C-m`     | Change major mode for current buffer              |
+| `C-c C-d`     | Mark line for deletion                            |
+| `C-c C-p`     | Expand file at point's context up one line        |
+| `C-c C-n`     | Expand file at point's context down one line      |
+| `C-c C-r`     | Revert buffer with disk contents                  |
+
+## ag-edit-ediff-mode
+
+| Key           | Action                                            |
+|:--------------|:--------------------------------------------------|
+| `C-c C-c`     | Commit Changes                                    |
+
+
+## ag-edit-ediff-mode
+
 # Customization
 
 * [counsel-edit-mode-major-mode](counsel-edit-mode-major-mode) <a name="counsel-edit-mode-major-mode"></a>The default major-mode used by the
