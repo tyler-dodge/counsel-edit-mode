@@ -809,14 +809,15 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
                           (--sort (< (overlay-get it 'ag-edit-order) (overlay-get other 'ag-edit-order))))))
       (when (not overlays)
         (goto-char beg)
-        (when-let ((overlay (counsel-edit-mode--prev-overlay-for-section)))
-          (goto-char (overlay-start overlay))
-          (let ((next-overlay-start (or (-some--> (counsel-edit-mode--next-overlay-for-section) (overlay-start it))
-                                        (point-max))))
-            (remove-text-properties (overlay-start overlay) (max (1- next-overlay-start)
-                                                                 (overlay-start overlay)) '(line-prefix))
-            (forward-line 1)
-            (counsel-edit-mode--propertize-line-prefix-region (point) (1- next-overlay-start) overlay))))
+        (let ((overlay (counsel-edit-mode--prev-overlay-for-section)))
+          (when overlay
+            (goto-char (overlay-start overlay))
+            (let ((next-overlay-start (or (-some--> (counsel-edit-mode--next-overlay-for-section) (overlay-start it))
+                                          (point-max))))
+              (remove-text-properties (overlay-start overlay) (max (1- next-overlay-start)
+                                                                   (overlay-start overlay)) '(line-prefix))
+              (forward-line 1)
+              (counsel-edit-mode--propertize-line-prefix-region (point) (1- next-overlay-start) overlay)))))
       (cl-loop for overlay in overlays
                do
                (progn
