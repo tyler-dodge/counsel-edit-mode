@@ -113,7 +113,7 @@ with showing the changes in ediff.
 
 ;;;###autoload
 (defun counsel-edit-mode-setup-ivy ()
-  "Adds counsel-edit-mode-ivy-action to the ivy actions for counsel."
+  "Add counsel-edit-mode-ivy-action to the ivy actions for counsel."
   (interactive)
   (ivy-add-actions 'counsel-git-grep
                    '(("e" counsel-edit-mode-ivy-action "Edit Results")))
@@ -181,7 +181,7 @@ Mainly exists for counsel-grep compatibility")
   "Temporary buffer used with ediff.")
 
 (defun counsel-edit-mode-ediff-changes ()
-  "Ediff the changes in the current `counsel-edit-mode' buffer.
+  "Ediff the modifications in the current `counsel-edit-mode' buffer.
 Use `counsel-edit-mode--confirm-commit' to commit from the ediff control buffer."
   (interactive)
   (let ((target-buffer (current-buffer))
@@ -221,14 +221,14 @@ should be used instead of directly calling the `major-mode' functions."
       (counsel-edit-mode--delete-line))))
 
 (defun counsel-edit-mode-undo-line ()
-  "Revert the current line or region back to its expected value. Undoes line deletions."
+  "Revert the current line or region back to its expected value.  Undo line deletions."
   (interactive)
   (save-mark-and-excursion
     (if (region-active-p) (counsel-edit-mode--undo-line-in-region (region-beginning) (region-end))
       (counsel-edit-mode--undo-line))))
 
 (defun counsel-edit-mode-commit ()
-  "Commit the changes in the `counsel-edit-mode' buffer."
+  "Commit the modifications in the `counsel-edit-mode' buffer."
   (interactive)
   (unless counsel-edit-mode (user-error "Will only commit `counsel-edit-mode' buffers"))
   (if counsel-edit-mode-confirm-commits
@@ -236,7 +236,7 @@ should be used instead of directly calling the `major-mode' functions."
     (counsel-edit-mode--confirm-commit)))
 
 (defun counsel-edit-mode-quit ()
-  "Discard the changes in the `counsel-edit-mode' buffer."
+  "Discard the modifications in the `counsel-edit-mode' buffer."
   (interactive)
   (unless counsel-edit-mode (user-error "Will only quit `counsel-edit-mode' buffers"))
   (when (and counsel-edit-mode-confirm-commits (not (y-or-n-p "Really discard changes? ")))
@@ -291,7 +291,7 @@ Given a prefix ARG, expand the context of all sections in the buffer."
                (counsel-edit-mode--insert-overlay file-name (1+ line-number))))))
 
 (defun counsel-edit-mode--confirm-commit ()
-  "Commit the changes in the `counsel-edit-mode' buffer."
+  "Commit the modifications in the `counsel-edit-mode' buffer."
   (interactive)
   (when counsel-edit-ediff-mode--target-buffer
     (let ((target-buffer counsel-edit-ediff-mode--target-buffer)
@@ -696,7 +696,8 @@ Returns nil for the last section in the buffer."
   "See comment near definition for generating (rx).")
 
 (defun counsel-edit-mode--format-buffer ()
-  "Formats the counsel-edit-mode buffer. Is a no-op if run multiple times in a `counsel-edit-mode' buffer."
+  "Format the counsel-edit-mode buffer.
+Is a no-op if run multiple times in a `counsel-edit-mode' buffer."
   (unless counsel-edit-mode (user-error "Will only format `counsel-edit-mode' buffers"))
   (unless counsel-edit-mode--formatted-buffer
     (delete-all-overlays)
@@ -761,8 +762,8 @@ Returns nil for the last section in the buffer."
                                           (--sort (< (car it) (car other)))
                                           (--map (cdr it)))))
     (unless (equal overlay-start-ordered-list (cl-loop for i upfrom 0 below (length overlay-start-ordered-list) collect i))
-      (unless (y-or-n-p "Overlays are not sorted correctly. This buffer might be dangerous to use for substitution. Continue? ")
-        (user-error "Overlays are not sorted correctly. This buffer might be dangerous to use for substitution. %S"
+      (unless (y-or-n-p "Overlays are not sorted correctly.  This buffer might be dangerous to use for substitution.  Continue? ")
+        (user-error "Overlays are not sorted correctly.  This buffer might be dangerous to use for substitution.  %S"
                overlay-start-ordered-list)))))
 
 (defun counsel-edit-ediff-mode--generate-original-text-buffer ()
@@ -828,7 +829,7 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
     (goto-char (overlay-start overlay))))
 
 (defun counsel-edit-mode--undo-line ()
-  "Revert the current line back to its expected value. Undoes line deletions."
+  "Revert the current line back to its expected value.  Undo line deletions."
   (let ((section-overlay (counsel-edit-mode--prev-overlay-for-section)))
     (save-excursion
       (-let ((end (-some--> (counsel-edit-mode--next-overlay-for-section) (overlay-start it))))
