@@ -1,6 +1,6 @@
 ;;; counsel-edit-mode.el --- Edit results of counsel commands in-place -*- lexical-binding: t -*-
 ;; Author: Tyler Dodge
-;; Version: 0.5
+;; Version: 0.6
 ;; Keywords: convenience, ag
 ;; Package-Requires: ((emacs "26.1") (ht "2.3") (s "1.12.0") (counsel "0.10.0"))
 ;; URL: https://github.com/tyler-dodge/counsel-edit-mode
