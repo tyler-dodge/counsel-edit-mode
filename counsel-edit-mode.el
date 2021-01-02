@@ -40,7 +40,7 @@
 (defcustom counsel-edit-mode-major-mode
   'prog-mode
   "The default major-mode used by the
-`counsel-edit-mode` buffer. This can be changed per `counsel-edit-mode` buffer 
+`counsel-edit-mode` buffer. This can be changed per `counsel-edit-mode` buffer
 by calling `counsel-edit-mode-change-major-mode` in that buffer."
   :type 'function
   :group 'counsel-edit)
@@ -819,10 +819,11 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
       (when (> (point) region-start)
         (forward-char -1)))))
 
-(defun counsel-edit-mode--after-change-fix-overlays (beg &rest _)
+(defun counsel-edit-mode--after-change-fix-overlays (beg end &rest _)
+  "Fix the overlays between BEG and END so that the invariants stay true. "
   (save-excursion
-    (-let ((overlays (->> (overlays-in (save-excursion (goto-char beg) (forward-line 0) (max (point-min) (1- (point))))
-                                       (save-excursion (goto-char beg) (end-of-line) (min (point-max) (1+ (point)))))
+    (-let ((overlays (->> (overlays-in (save-excursion (goto-char (1- beg)) (forward-line 0) (max (point-min) (1- (point))))
+                                       (save-excursion (goto-char (1+ beg)) (end-of-line) (min (point-max) (1+ (point)))))
                           (--filter (overlay-get it 'counsel-edit-order))
                           (--sort (< (overlay-get it 'counsel-edit-order) (overlay-get other 'counsel-edit-order))))))
       (unless overlays
@@ -846,9 +847,8 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
                                                              (not (eq overlay it)))))))
                    (goto-char start)
                    (unless (eq delimiter ?\n) 
-                     (goto-char start)
                      (insert "\n")
-                     (-let [new-pt (1+ (point))]
+                     (-let [new-pt (point)]
                        (--each (append (list overlay) other-overlays)
                          (move-overlay it new-pt new-pt))))
                    (when other-overlays
@@ -865,6 +865,9 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
                      (counsel-edit-mode--propertize-line-prefix-region (point) (1- next-overlay-start) overlay))))))))
 
 (defun counsel-edit-mode--propertize-line-prefix-region (beg end overlay)
+  "Propertize the section between BEG and END with line-prefixes
+Does nothing if OVERLAY is not the overlay for the section between BEG and END.
+"
   (save-excursion
     (goto-char beg)
     (when (and (< beg end) (eq (counsel-edit-mode--prev-overlay-for-section) overlay))
@@ -875,6 +878,14 @@ FACE defaults to `counsel-edit-mode-overlay' if nil."
                                   'face 'counsel-edit-mode-expanded-context-overlay))))))
 
 (defun counsel-edit-mode--transformation-list ()
+  "Return a list where each item is a plist of  the format
+(:metadata :start-overlay :end-overlay :string).
+
+:string the transformation text
+:end-overlay overlay marking the start of the next sectionn
+:start-overlay the overlay marking the start of the section
+:metadata the metadata for the section
+"
   (cl-loop for rest = counsel-edit-mode--section-overlays then (cdr rest)
        while (car rest)
        collect
