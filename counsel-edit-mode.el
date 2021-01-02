@@ -61,7 +61,8 @@ it will expand every section in the buffer."
 
 (defcustom counsel-edit-mode-confirm-commits
   nil
-  "The default `major-mode' used by the
+  "The default `major-mode' used by `counsel-edit-mode'.
+
 When this is set non-nil, `counsel-edit-mode` will confirm commits
 with showing the changes in ediff.
 
