@@ -49,7 +49,7 @@ by calling `counsel-edit-mode-change-major-mode` in that buffer."
   nil
   "When this is set non-nil, `counsel-edit-mode' will expand the context of each file until all matching delimeters are closed.
 This can be done manually per section by calling `counsel-edit-mode-expand-section'.
-If `counsel-edit-mode-expand-section' is called with a prefix arg, 
+If `counsel-edit-mode-expand-section' is called with a prefix arg,
 it will expand every section in the buffer."
   :type 'boolean
   :group 'counsel-edit)
@@ -58,7 +58,10 @@ it will expand every section in the buffer."
   nil
   "The default major-mode used by the
 When this is set non-nil, `counsel-edit-mode` will confirm commits with showing the changes in ediff. 
-<kbd>C-c C-c</kbd> confirms the changes in ediff whereas <kbd>q</kbd> will close the ediff session."
+
+\\[counsel-edit-mode--confirm-commit] confirms the changes in ediff.
+
+\\[ediff-quit] will close the ediff session."
   :type 'boolean
   :group 'counsel-edit)
 
@@ -94,16 +97,16 @@ When this is set non-nil, `counsel-edit-mode` will confirm commits with showing 
     (define-key it (kbd "C-c C-c") #'counsel-edit-mode-commit)
     (define-key it (kbd "C-c C-p") #'counsel-edit-mode-expand-context-up)
     (define-key it (kbd "C-c C-n") #'counsel-edit-mode-expand-context-down))
-  "Keymap for `counsel-edit-mode'")
+  "Keymap for `counsel-edit-mode'.")
 
 (defvar counsel-edit-mode-ediff-mode-map
   (--doto (make-sparse-keymap)
     (define-key it (kbd "C-c C-c") #'counsel-edit-mode--confirm-commit))
-  "Keymap for `counsel-edit-ediff-mode'")
+  "Keymap for `counsel-edit-ediff-mode'.")
 
 ;;;###autoload
 (defun counsel-edit-mode-setup-ivy ()
-  "Adds counsel-edit-mode-ivy-action to the ivy actions for counsel-ag."
+  "Adds counsel-edit-mode-ivy-action to the ivy actions for counsel."
   (interactive)
   (ivy-add-actions 'counsel-git-grep
                    '(("e" counsel-edit-mode-ivy-action "Edit Results")))
@@ -235,7 +238,7 @@ instead of directly calling the major-mode functions."
   (kill-buffer (current-buffer)))
 
 (defun counsel-edit-mode-goto ()
-  "Goto the line that will be replaced with the one at point in the `counsel-edit-mode buffer'"
+  "Goto the line that will be replaced with the one at point in the `counsel-edit-mode buffer'."
   (interactive)
   (unless counsel-edit-mode (user-error "Will only goto in `counsel-edit-mode' buffers"))
   (-let (((&plist :file-name :line-number) (overlay-get (counsel-edit-mode--prev-overlay-for-section) 'metadata)))
@@ -257,8 +260,8 @@ instead of directly calling the major-mode functions."
       (redisplay))))
 
 (defun counsel-edit-mode-expand-section (arg)
-  "Expand the context of the current section until there are no mismatched delimiters.
-Given a prefix argument, expand the context of all sections in the buffer."
+  "Expand the context of the current section while mismatched delimiters remain.
+Given a prefix ARG, expand the context of all sections in the buffer."
   (interactive "P")
   (if arg (counsel-edit-mode-expand-all)
     (save-excursion (counsel-edit-mode--add-context-lines-in-contiguous-section))))
@@ -358,7 +361,7 @@ Continue? "))))
   (-some--> (counsel-edit-mode--contiguous-section-end) (goto-char it)))
 
 (defun counsel-edit-mode--matching-delimiter (delimiter)
-  "Return the matching delimiter for PAREN."
+  "Return the matching delimiter for DELIMITER."
   (pcase delimiter
     (?\] ?\[)
     (?\) ?\()
@@ -452,7 +455,7 @@ If a mismatch is found:
 
 (defun counsel-edit-mode--prev-overlay-for-section ()
   "Get the overlay for the start of the next section. 
-Returns `nil' for the last section in the buffer."
+Returns nil for the last section in the buffer."
   (-let ((overlay nil)
          (at-pt-min nil))
     (save-excursion
@@ -467,7 +470,7 @@ Returns `nil' for the last section in the buffer."
 
 (defun counsel-edit-mode--next-overlay-for-section ()
   "Get the overlay for the start of the next section. 
-Returns `nil' for the last section in the buffer."
+Returns nil for the last section in the buffer."
   (-let ((overlay nil))
     (save-excursion
       (unless (eobp) (forward-char 1))
@@ -619,6 +622,7 @@ Returns `nil' for the last section in the buffer."
                          (cl-return (1- (overlay-start next-overlay))))))))))))
 
 (defun counsel-edit-mode--contiguous-section-start ()
+  "Return the point for the beginning of the current contiguous set of lines."
   (cl-block nil
     (-let ((start-overlay (counsel-edit-mode--prev-overlay-for-section))
            (after-overlay-line-number))
@@ -781,7 +785,12 @@ Returns `nil' for the last section in the buffer."
           (insert "\n"))))))
 
 (defun counsel-edit-mode--make-line-details-overlay (pt original-text metadata &optional face)
-  "Initialize a line details overlay at PT with ORIGINAL-TEXT and METATADAT set as overlay properties.
+  "Initialize a line details overlay at PT.
+
+The overlay will have the following properties:
+  `overlay-text' OVERLAY-TEXT
+  `metadata' METADATA
+
 FACE defaults to `counsel-edit-mode-overlay' if nil."
   (-let [(&plist :file-name :line-number) metadata]
     (let ((overlay-text (concat
@@ -896,7 +905,7 @@ Does nothing if OVERLAY is not the overlay for the section between BEG and END."
 (defun counsel-edit-mode--transformation-list ()
   "Return a list where each item is a plist.
 The plist is of the form:
-(:metadata :start-overlay :end-overlay :string).
+\\(:metadata :start-overlay :end-overlay :string\\).
 
 :string the transformation text
 :end-overlay overlay marking the start of the next sectionn
