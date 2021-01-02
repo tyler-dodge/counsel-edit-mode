@@ -54,9 +54,6 @@ type <kbd>M-o e</kbd> to open up the `counsel-edit-mode` buffer to edit the resu
 |:--------------|:--------------------------------------------------|
 | `C-c C-c`     | Commit Changes                                    |
 
-
-## counsel-edit-ediff-mode
-
 # Customization
 
 * [counsel-edit-mode-major-mode](counsel-edit-mode-major-mode) <a name="counsel-edit-mode-major-mode"></a>The default major-mode used by the
