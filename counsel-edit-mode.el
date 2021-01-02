@@ -326,28 +326,28 @@ Continue?"))))
 (defun counsel-edit-mode--add-context-lines-in-contiguous-section ()
   (unless counsel-edit-mode (user-error "Will only goto in `counsel-edit-mode' buffers."))
   (cl-loop while
-           (when-let (mismatched
-                      (-some--> (cons (counsel-edit-mode--contiguous-section-start) (counsel-edit-mode--contiguous-section-end))
-                           (and (car it) (cdr it) it)
-                           (counsel-edit-mode--validate-parens  (car it) (cdr it))))
-                   (condition-case err
-                       (pcase mismatched
-                         ((or ?\} ?\) ?\])
-                          (-let [(&plist :file-name :line-number) (counsel-edit-mode--prev-missing-line)]
-                            (when (<= (1- line-number) 0) (user-error "Missing matching delimiter."))
-                            (counsel-edit-mode--insert-overlay file-name (1- line-number))
-                            t))
-                         ((or ?\{ ?\( ?\[)
-                          (-let [(&plist :file-name :line-number) (counsel-edit-mode--next-missing-line)]
-                            (counsel-edit-mode--insert-overlay file-name (1+ line-number))
-                            t))
-                         (pt (user-error "Unexpected delimiter %s" pt)))
-                     (error (message "Error While parsing %s. %s"
-                                     (plist-get  (overlay-get (counsel-edit-mode--prev-overlay-for-section) 'metadata) :file-name)
-                                     (error-message-string err)) nil)
-                     (user-error (message "Error While parsing %s. %s"
-                                     (plist-get  (overlay-get (counsel-edit-mode--prev-overlay-for-section) 'metadata) :file-name)
-                                     (error-message-string err)) nil))))
+           (let ((mismatched (-some--> (cons (counsel-edit-mode--contiguous-section-start) (counsel-edit-mode--contiguous-section-end))
+                               (and (car it) (cdr it) it)
+                               (counsel-edit-mode--validate-parens  (car it) (cdr it)))))
+             (when mismatched
+               (condition-case err
+                   (pcase mismatched
+                     ((or ?\} ?\) ?\])
+                      (-let [(&plist :file-name :line-number) (counsel-edit-mode--prev-missing-line)]
+                        (when (<= (1- line-number) 0) (user-error "Missing matching delimiter."))
+                        (counsel-edit-mode--insert-overlay file-name (1- line-number))
+                        t))
+                     ((or ?\{ ?\( ?\[)
+                      (-let [(&plist :file-name :line-number) (counsel-edit-mode--next-missing-line)]
+                        (counsel-edit-mode--insert-overlay file-name (1+ line-number))
+                        t))
+                     (pt (user-error "Unexpected delimiter %s" pt)))
+                 (error (message "Error While parsing %s. %s"
+                                 (plist-get  (overlay-get (counsel-edit-mode--prev-overlay-for-section) 'metadata) :file-name)
+                                 (error-message-string err)) nil)
+                 (user-error (message "Error While parsing %s. %s"
+                                      (plist-get  (overlay-get (counsel-edit-mode--prev-overlay-for-section) 'metadata) :file-name)
+                                      (error-message-string err)) nil)))))
   (-some--> (counsel-edit-mode--contiguous-section-end) (goto-char it)))
 
 (defun ag-edit--matching-delimiter (delimiter)
