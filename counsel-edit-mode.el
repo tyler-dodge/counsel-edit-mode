@@ -41,7 +41,7 @@
   'prog-mode
   "The default `major-mode' used by the `counsel-edit-mode` buffer.
 This can be changed per `counsel-edit-mode` buffer
-by calling `counsel-edit-mode-change-major-mode` in that buffer."
+by calling \\[counsel-edit-mode-change-major-mode] in that buffer."
   :type 'function
   :group 'counsel-edit)
 
