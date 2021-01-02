@@ -25,6 +25,10 @@ Comin Soon to Melpa!
 for structural editing on search output.
 * Ediff support for viewing changes made in the `counsel-edit-mode` bufffer.
 
+# Screenshot
+
+![counsel-edit-mode](screenshot/Usage.gif)
+
 # Usage
 
 Once installed, run any of the counsel search commands. Once they start returning results, 
