@@ -3,7 +3,7 @@
 # and https://github.com/moby/moby/issues/22801
 language: emacs-lisp
 sudo: required
-dist: focal
+dist: bionic
 cache:
   - directories:
       # Cache stable Emacs binaries (saves 1min per job)
