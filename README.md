@@ -32,7 +32,7 @@ type <kbd>M-o e</kbd> to open up the `counsel-edit-mode` buffer to edit the resu
 
 # Keymap
 
-## ag-edit-mode
+## counsel-edit-mode
 
 | Key           | Action                                            |
 |:--------------|:--------------------------------------------------|
@@ -48,14 +48,14 @@ type <kbd>M-o e</kbd> to open up the `counsel-edit-mode` buffer to edit the resu
 | `C-c C-n`     | Expand file at point's context down one line      |
 | `C-c C-r`     | Revert buffer with disk contents                  |
 
-## ag-edit-ediff-mode
+## counsel-edit-ediff-mode
 
 | Key           | Action                                            |
 |:--------------|:--------------------------------------------------|
 | `C-c C-c`     | Commit Changes                                    |
 
 
-## ag-edit-ediff-mode
+## counsel-edit-ediff-mode
 
 # Customization
 
