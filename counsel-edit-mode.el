@@ -201,10 +201,12 @@ should be used instead of directly calling the `major-mode' functions."
   (interactive "C")
   (unless counsel-edit-mode (user-error "Can only call `counsel-edit-mode-change-major-mode' in `counsel-edit-mode' buffers"))
   (let ((formatted-buffer counsel-edit-mode--formatted-buffer)
-        (sections counsel-edit-mode--section-overlays))
+        (sections counsel-edit-mode--section-overlays)
+        (start-buffer counsel-edit-mode--start-buffer))
     (funcall-interactively new-major-mode)
     (setq-local counsel-edit-mode--formatted-buffer formatted-buffer)
     (setq-local counsel-edit-mode--section-overlays sections)
+    (setq-local counsel-edit-mode--start-buffer start-buffer)
     (counsel-edit-mode 1)))
 
 (defun counsel-edit-mode-mark-line-deleted ()

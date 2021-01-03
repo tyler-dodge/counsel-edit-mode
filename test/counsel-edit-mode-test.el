@@ -24,6 +24,7 @@
     (goto-char (point-min))
     (delete-char 4)
     (insert "REPLACED")
+    (should (not (counsel-edit-mode--validate-section-overlays)))
     (counsel-edit-mode--confirm-commit)
     (should (string=
              (counsel-edit-mode--test-file-string "A.txt")
@@ -49,6 +50,7 @@ four five TEST
     (goto-char (point-min))
     (while (re-search-forward (rx "TEST") nil t)
       (replace-match "REPLACED"))
+    (should (not (counsel-edit-mode--validate-section-overlays)))
     (counsel-edit-mode--confirm-commit)
     (should (string= (counsel-edit-mode--test-file-string "multiline-match.txt")
              "REPLACED one
@@ -67,6 +69,7 @@ four five REPLACED
     (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
     (should (string= (buffer-string) "    TEST (
 "))
+    (should (not (counsel-edit-mode--validate-section-overlays)))
     (counsel-edit-mode-expand-all)
     (should (string= (buffer-string) "(defun
     TEST (
@@ -84,6 +87,7 @@ four five REPLACED
 "))
     (goto-char (point-min))
     (counsel-edit-mode-mark-line-deleted)
+    (should (not (counsel-edit-mode--validate-section-overlays)))
     (counsel-edit-mode--confirm-commit)
     (should (string= (counsel-edit-mode--test-file-string "deletion.txt") "LINE 1
 LINE 2
@@ -111,6 +115,7 @@ LINE 5
     (replace-match "REPLACED 4")
     (goto-char (point-max))
     (insert "INSERTION")
+    (should (not (counsel-edit-mode--validate-section-overlays)))
     (counsel-edit-mode--confirm-commit)
     (should (string= (counsel-edit-mode--test-file-string "extra-context.txt") "REPLACED 1
 LINE 2
@@ -135,6 +140,7 @@ LINE 5
     (activate-mark)
     (goto-char (point-min))
     (counsel-edit-mode-undo-line)
+    (should (not (counsel-edit-mode--validate-section-overlays)))
     (counsel-edit-mode--confirm-commit)
     (should (string= (counsel-edit-mode--test-file-string "extra-context.txt") "LINE 1
 LINE 2
@@ -157,5 +163,24 @@ LINE 5
     (should (string= (f-filename (buffer-file-name))
                      "extra-context.txt"))
     (should (eq (line-number-at-pos (point)) 3))))
+
+(ert-deftest counsel-edit-mode-change-mode ()
+  "Ensure that change mode works as expected"
+  (setup-test-directory "assets/extra-context.txt")
+  (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
+    (let ((counsel-edit-mode-expand-braces-by-default nil))
+      (switch-to-buffer (counsel-edit-mode-ivy-action)))
+    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string= (buffer-string) "LINE 3 TEST
+"))
+    (counsel-edit-mode-change-major-mode 'emacs-lisp-mode)
+    (should (string= (buffer-string) "LINE 3 TEST
+"))
+    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (eq major-mode 'emacs-lisp-mode))
+    (should counsel-edit-mode--formatted-buffer)
+    (should counsel-edit-mode--section-overlays)
+    (should counsel-edit-mode--start-buffer)
+    (should (not (counsel-edit-mode--validate-section-overlays)))))
 
 (provide 'counsel-edit-mode-test)
