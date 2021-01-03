@@ -248,10 +248,12 @@ should be used instead of directly calling the `major-mode' functions."
   (interactive)
   (unless counsel-edit-mode (user-error "Will only goto in `counsel-edit-mode' buffers"))
   (-let (((&plist :file-name :line-number) (overlay-get (counsel-edit-mode--prev-overlay-for-section) 'metadata)))
-    (find-file file-name)
+    (set-buffer (or (find-buffer-visiting file-name)
+                    (find-file-noselect file-name)))
     (goto-char (point-min))
     (forward-line (1- line-number))
-    (current-buffer)))
+    (current-buffer)
+    (display-buffer (current-buffer))))
 
 (defun counsel-edit-mode-expand-all ()
   "Expand the context of all of the files in the `counsel-edit-mode' buffer until there are no unmatched delimiters."

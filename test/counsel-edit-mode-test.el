@@ -26,8 +26,7 @@
     (insert "REPLACED")
     (counsel-edit-mode--confirm-commit)
     (should (string=
-             (with-current-buffer (find-file-noselect (f-join test-directory "A.txt"))
-               (buffer-string))
+             (counsel-edit-mode--test-file-string "A.txt")
              "REPLACED one
 two
 three
@@ -51,9 +50,7 @@ four five TEST
     (while (re-search-forward (rx "TEST") nil t)
       (replace-match "REPLACED"))
     (counsel-edit-mode--confirm-commit)
-    (should (string=
-             (with-current-buffer (find-file-noselect (f-join test-directory "multiline-match.txt"))
-               (buffer-string))
+    (should (string= (counsel-edit-mode--test-file-string "multiline-match.txt")
              "REPLACED one
 SPACE
 two REPLACED three
@@ -88,7 +85,7 @@ four five REPLACED
     (goto-char (point-min))
     (counsel-edit-mode-mark-line-deleted)
     (counsel-edit-mode--confirm-commit)
-    (should (string= (with-current-buffer (find-file-noselect (f-join test-directory "deletion.txt")) (buffer-string)) "LINE 1
+    (should (string= (counsel-edit-mode--test-file-string "deletion.txt") "LINE 1
 LINE 2
 LINE 4
 LINE 5
@@ -115,12 +112,50 @@ LINE 5
     (goto-char (point-max))
     (insert "INSERTION")
     (counsel-edit-mode--confirm-commit)
-    (should (string= (with-current-buffer (find-file-noselect (f-join test-directory "extra-context.txt")) (buffer-string)) "REPLACED 1
+    (should (string= (counsel-edit-mode--test-file-string "extra-context.txt") "REPLACED 1
 LINE 2
 LINE 3 TEST
 REPLACED 4
 INSERTION
 LINE 5
 "))))
+
+(ert-deftest counsel-edit-mode-undo-line ()
+  "Ensure that undo line works as expected"
+  (setup-test-directory "assets/extra-context.txt")
+  (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
+    (let ((counsel-edit-mode-expand-braces-by-default nil))
+      (switch-to-buffer (counsel-edit-mode-ivy-action)))
+    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string= (buffer-string) "LINE 3 TEST
+"))
+    (goto-char (point-min))
+    (erase-buffer)
+    (goto-char (point-max))
+    (activate-mark)
+    (goto-char (point-min))
+    (counsel-edit-mode-undo-line)
+    (counsel-edit-mode--confirm-commit)
+    (should (string= (counsel-edit-mode--test-file-string "extra-context.txt") "LINE 1
+LINE 2
+LINE 3 TEST
+LINE 4
+LINE 5
+"))))
+
+(ert-deftest counsel-edit-mode-goto ()
+  "Ensure that goto works as expected"
+  (setup-test-directory "assets/extra-context.txt")
+  (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
+    (let ((counsel-edit-mode-expand-braces-by-default nil))
+      (switch-to-buffer (counsel-edit-mode-ivy-action)))
+    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string= (buffer-string) "LINE 3 TEST
+"))
+    (let ((buffer (window-buffer (counsel-edit-mode-goto))))
+      (should (eq (current-buffer) buffer)))
+    (should (string= (f-filename (buffer-file-name))
+                     "extra-context.txt"))
+    (should (eq (line-number-at-pos (point)) 3))))
 
 (provide 'counsel-edit-mode-test)

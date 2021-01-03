@@ -13,3 +13,6 @@
            (copy-file file (f-join test-directory (f-filename file))))
   (switch-to-buffer (generate-new-buffer " *test-buffer*")))
 
+(defun counsel-edit-mode--test-file-string (file-name)
+  (with-temp-buffer (insert-file-contents (f-join test-directory file-name)) (buffer-string)))
+
