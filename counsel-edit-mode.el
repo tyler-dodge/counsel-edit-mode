@@ -262,10 +262,14 @@ should be used instead of directly calling the `major-mode' functions."
     (goto-char (point-min))
     (counsel-edit-mode--add-context-lines-in-contiguous-section)
     (redisplay)
-    (while (not (eobp))
-      (forward-line 1)
-      (counsel-edit-mode--add-context-lines-in-contiguous-section)
-      (redisplay))))
+    
+    (let ((last-time (current-time)))
+      (while (not (eobp))
+        (forward-line 1)
+        (counsel-edit-mode--add-context-lines-in-contiguous-section)
+        (when (> (time-to-seconds (time-subtract (current-time) last-time)) 1)
+          (setq last-time (current-time))
+          (redisplay))))))
 
 (defun counsel-edit-mode-expand-section (arg)
   "Expand the context of the current section while mismatched delimiters remain.
