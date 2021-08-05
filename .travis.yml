@@ -1,37 +1,13 @@
-# Emacs fails to build in container-based builds on Travis
-# See https://github.com/travis-ci/travis-ci/issues/9061
-# and https://github.com/moby/moby/issues/22801
-language: ruby
-dist: trusty
-cache:
-  - directories:
-      # Cache stable Emacs binaries (saves 1min per job)
-      - "$HOME/emacs/"
+language: nix
+nix: 2.3.6
 env:
-  - EMACS_VERSION=26.1
-  - EMACS_VERSION=26.2
   - EMACS_VERSION=26.3
   - EMACS_VERSION=27.1
-before_install:
-  # Configure $PATH: Executables are installed to $HOME/bin
-  - export PATH="$HOME/bin:$PATH"
-  # Download the makefile to emacs-travis.mk
-  - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
-  # Install Emacs (according to $EMACS_VERSION) and Cask
-  
-  # The Ubuntu 14.04 image on Travis has an outdated GnuTLS which prevents us from
-  # pulling from ELPA/MELPA under Emacs 26 and above.
-  # See https://emacs.stackexchange.com/a/38404
-  - make -f emacs-travis.mk install_gnutls
-  - make -f emacs-travis.mk install_emacs
-  - make -f emacs-travis.mk install_cask
-install:
-  # Install your dependencies
-  - cask install
+  - EMACS_VERSION=27.2
+cache:
+  directories:
+     - /nix/store
 script:
-  # Run your tests
-  - make test
-addons:
-  apt:
-    packages:
-      - libperl-dev
+   - glibcLocales=$(nix-build --no-out-link "<nixpkgs>" -A glibcLocales)
+   - export LOCALE_ARCHIVE_2_27="${glibcLocales}/lib/locale/locale-archive"
+   - yes yes | nix-shell nix/emacs-${EMACS_VERSION}.nix --run '${emacs}/bin/emacs --batch -q -l counsel-edit-mode.el -l ert-runner'

@@ -138,20 +138,27 @@ Mainly exists for counsel-grep compatibility")
 
 (defun counsel-edit-mode-ivy-action (&rest _)
   "Action for use with ivy that triggers `counsel-edit-mode'."
-  (let ((start-buffer (current-buffer)))
-    (-some--> (with-current-buffer (generate-new-buffer "*ag-edit*")
-                (let ((buffer (current-buffer)))
-                  (display-buffer buffer)
+  (let ((start-buffer (current-buffer))
+        (edit-buffer (generate-new-buffer "*counsel-edit*")))
+    (-some--> (with-current-buffer edit-buffer
+                (display-buffer edit-buffer)
+                (with-current-buffer edit-buffer
                   (condition-case _
                       (save-excursion
                         (insert (shell-command-to-string (--> counsel--async-last-command
-                                                              (if (listp it) (s-join " " it) it))))
+                                                           (if (listp it) (->> it
+                                                                            (--map (shell-quote-argument it))
+                                                                            (s-join " "))
+                                                             it))))
                         (goto-char (point-min))
                         (funcall counsel-edit-mode-major-mode)
                         (setq-local counsel-edit-mode--start-buffer start-buffer)
                         (counsel-edit-mode 1)
-                        buffer))))
-      (prog1 it (display-buffer it)))))
+                        edit-buffer)
+                    (user-error (progn (kill-buffer edit-buffer)
+                                       'deleted)))))
+      (cond ((eq it 'deleted) (user-error "Failed to created buffer"))
+            (t (prog1 it (display-buffer it)))))))
 
 (define-minor-mode counsel-edit-mode
   "Special mode for Ag-Edit Buffers"

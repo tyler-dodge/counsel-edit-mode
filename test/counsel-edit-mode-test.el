@@ -17,7 +17,7 @@
   (setup-test-directory "assets/A.txt" "assets/B.txt")
   (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
     (switch-to-buffer (counsel-edit-mode-ivy-action))
-    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
     (should (string= (buffer-string) "TEST one
 "))
 
@@ -41,7 +41,7 @@ six
   (setup-test-directory "assets/multiline-match.txt")
   (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
     (switch-to-buffer (counsel-edit-mode-ivy-action))
-    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
     (should (string= (buffer-string) "TEST one
 two TEST three
 four five TEST
@@ -66,7 +66,7 @@ four five REPLACED
   (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
     (let ((counsel-edit-mode-expand-braces-by-default nil))
       (switch-to-buffer (counsel-edit-mode-ivy-action)))
-    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
     (should (string= (buffer-string) "    TEST (
 "))
     (should (not (counsel-edit-mode--validate-section-overlays)))
@@ -82,7 +82,7 @@ four five REPLACED
   (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
     (let ((counsel-edit-mode-expand-braces-by-default nil))
       (switch-to-buffer (counsel-edit-mode-ivy-action)))
-    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
     (should (string= (buffer-string) "TEST LINE 3
 "))
     (goto-char (point-min))
@@ -101,7 +101,7 @@ LINE 5
   (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
     (let ((counsel-edit-mode-expand-braces-by-default nil))
       (switch-to-buffer (counsel-edit-mode-ivy-action)))
-    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
     (should (string= (buffer-string) "LINE 3 TEST
 "))
     (goto-char (point-min))
@@ -131,7 +131,7 @@ LINE 5
   (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
     (let ((counsel-edit-mode-expand-braces-by-default nil))
       (switch-to-buffer (counsel-edit-mode-ivy-action)))
-    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
     (should (string= (buffer-string) "LINE 3 TEST
 "))
     (goto-char (point-min))
@@ -155,7 +155,7 @@ LINE 5
   (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
     (let ((counsel-edit-mode-expand-braces-by-default nil))
       (switch-to-buffer (counsel-edit-mode-ivy-action)))
-    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
     (should (string= (buffer-string) "LINE 3 TEST
 "))
     (let ((buffer (window-buffer (counsel-edit-mode-goto))))
@@ -170,17 +170,50 @@ LINE 5
   (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
     (let ((counsel-edit-mode-expand-braces-by-default nil))
       (switch-to-buffer (counsel-edit-mode-ivy-action)))
-    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
     (should (string= (buffer-string) "LINE 3 TEST
 "))
     (counsel-edit-mode-change-major-mode 'emacs-lisp-mode)
     (should (string= (buffer-string) "LINE 3 TEST
 "))
-    (should (string-prefix-p  "*ag-edit" (buffer-name (current-buffer))))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
     (should (eq major-mode 'emacs-lisp-mode))
     (should counsel-edit-mode--formatted-buffer)
     (should counsel-edit-mode--section-overlays)
     (should counsel-edit-mode--start-buffer)
     (should (not (counsel-edit-mode--validate-section-overlays)))))
+
+(ert-deftest counsel-edit-mode-change-revert-buffer ()
+  "Ensure that revert-buffer works as expected"
+  (setup-test-directory "assets/extra-context.txt")
+  (let ((counsel--async-last-command (concat "grep -Rn " (shell-quote-argument "TEST" ) " " (shell-quote-argument test-directory))))
+    (let ((counsel-edit-mode-expand-braces-by-default nil))
+      (switch-to-buffer (counsel-edit-mode-ivy-action)))
+    (should (string-prefix-p  "*counsel-edit" (buffer-name (current-buffer))))
+    (should (string= (buffer-string) "LINE 3 TEST
+"))
+    (with-current-buffer (or (find-buffer-visiting (f-join test-directory "extra-context.txt"))
+                             (find-file-noselect (f-join test-directory "extra-context.txt")
+                                                 t))
+      (goto-char (point-min))
+      (while (re-search-forward (rx "TEST") nil t)
+        (replace-match "REPLACED 1"))
+      (save-buffer)
+      (kill-buffer (current-buffer)))
+    (counsel-edit-mode--revert-buffer)
+    (should (string= (buffer-string) "LINE 3 REPLACED 1"))
+    (should (not (counsel-edit-mode--validate-section-overlays)))
+    (goto-char (point-min))
+    (while (re-search-forward (rx "REPLACED 1") nil t)
+      (replace-match "REPLACED 2"))
+    (let ((counsel-edit-mode-confirm-commits nil))
+      (counsel-edit-mode-commit))
+    (should (string= (counsel-edit-mode--test-file-string "extra-context.txt")
+                     "LINE 1
+LINE 2
+LINE 3 REPLACED 2
+LINE 4
+LINE 5
+" ))))
 
 (provide 'counsel-edit-mode-test)
