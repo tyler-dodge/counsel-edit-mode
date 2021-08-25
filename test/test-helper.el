@@ -4,7 +4,7 @@
   (unless (and (s-ends-with-p "test/" default-directory)
                (f-exists-p "test"))
     (setq default-directory (f-join default-directory "test")))
-  (setq test-directory (f-join default-directory "build/test-files"))
+  (setq test-directory (f-join default-directory "../build/test-files"))
   (mkdir test-directory t)
   (f-delete test-directory t)
   (mkdir test-directory t)

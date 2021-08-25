@@ -5,11 +5,8 @@ let
     ref = "refs/heads/nixpkgs-unstable";                     
     rev = "bed08131cd29a85f19716d9351940bdc34834492";       
   }) {};
-  emacsWithPackages = import ./emacs-packages.nix {
-    emacsWithPackages = with pkgs; (emacsPackagesNgGen emacs26).emacsWithPackages;
+  emacsWithPackages = with pkgs; (emacsPackagesNgGen emacs).emacsWithPackages;
+  run-test = import ./run-test.nix {
+    inherit emacsWithPackages;
   };
-in pkgs.mkShell {
-  packages = [
-    emacsWithPackages];
-  emacs = emacsWithPackages;
-}
+in run-test
