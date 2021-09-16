@@ -2,7 +2,7 @@
 [![License](https://img.shields.io/badge/license-GPL_3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.txt)
 [![MELPA](https://melpa.org/packages/counsel-edit-mode-badge.svg)](https://melpa.org/#/counsel-edit-mode)
 [![Version](https://img.shields.io/github/v/tag/tyler-dodge/counsel-edit-mode)](https://github.com/tyler-dodge/counsel-edit-mode/releases)
-[![Build Status](https://travis-ci.com/tyler-dodge/counsel-edit-mode.svg?branch=master)](https://travis-ci.com/github/tyler-dodge/counsel-edit-mode) [![Coverage Status](https://coveralls.io/repos/github/tyler-dodge/counsel-edit-mode/badge.svg?branch=master)](https://coveralls.io/github/tyler-dodge/counsel-edit-mode)
+[![Build Status](https://app.travis-ci.com/tyler-dodge/counsel-edit-mode.svg?branch=master)](https://travis-ci.com/github/tyler-dodge/counsel-edit-mode) [![Coverage Status](https://coveralls.io/repos/github/tyler-dodge/counsel-edit-mode/badge.svg?branch=master)](https://coveralls.io/github/tyler-dodge/counsel-edit-mode)
 
 ---
 
