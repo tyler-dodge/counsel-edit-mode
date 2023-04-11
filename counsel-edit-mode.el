@@ -113,7 +113,7 @@ with showing the changes in ediff.
 
 ;;;###autoload
 (defun counsel-edit-mode-setup-ivy ()
-  "Add counsel-edit-mode-ivy-action to the ivy actions for counsel."
+  "Add `counsel-edit-mode-ivy-action' to the ivy actions for counsel."
   (interactive)
   (ivy-add-actions 'counsel-git-grep
                    '(("e" counsel-edit-mode-ivy-action "Edit Results")))
@@ -134,7 +134,7 @@ with showing the changes in ediff.
 
 (defvar-local counsel-edit-mode--start-buffer nil
   "Buffer that the counsel-edit-mode-action was invoked from.
-Mainly exists for counsel-grep compatibility")
+Mainly exists for `counsel-grep' compatibility")
 
 (defun counsel-edit-mode-ivy-action (&rest _)
   "Action for use with ivy that triggers `counsel-edit-mode'."
@@ -161,9 +161,10 @@ Mainly exists for counsel-grep compatibility")
             (t (prog1 it (display-buffer it)))))))
 
 (define-minor-mode counsel-edit-mode
-  "Special mode for Ag-Edit Buffers"
-  nil
+  "Special mode for Ag-Edit Buffers."
+  :lighter
   " Ag-Edit"
+  :keymap
   counsel-edit-mode-map
   (when counsel-edit-mode
     (when (buffer-file-name)
@@ -177,8 +178,9 @@ Mainly exists for counsel-grep compatibility")
 
 (define-minor-mode counsel-edit-ediff-mode
   "Special mode for ediff buffers for use with `counsel-edit-mode'."
-  nil
+  :lighter
   " Ag-Ediff"
+  :keymap
   counsel-edit-mode-ediff-mode-map)
 
 (defvar-local counsel-edit-ediff-mode--target-buffer nil
@@ -217,7 +219,7 @@ should be used instead of directly calling the `major-mode' functions."
     (counsel-edit-mode 1)))
 
 (defun counsel-edit-mode-mark-line-deleted ()
-  "Mark the current line or regions for deletion once the `counsel-edit-mode' buffer is committed."
+  "Mark the current line or region for deletion in `counsel-edit-mode'."
   (interactive)
   (save-mark-and-excursion
     (if (region-active-p)
@@ -230,7 +232,9 @@ should be used instead of directly calling the `major-mode' functions."
       (counsel-edit-mode--delete-line))))
 
 (defun counsel-edit-mode-undo-line ()
-  "Revert the current line or region back to its expected value.  Undo line deletions."
+  "Revert the current line or region back to its expected value.
+
+Undo line deletions."
   (interactive)
   (save-mark-and-excursion
     (if (region-active-p) (counsel-edit-mode--undo-line-in-region (region-beginning) (region-end))
@@ -253,7 +257,7 @@ should be used instead of directly calling the `major-mode' functions."
   (kill-buffer (current-buffer)))
 
 (defun counsel-edit-mode-goto ()
-  "Goto the line that will be replaced with the one at point in the `counsel-edit-mode buffer'."
+  "Goto the line that will be replaced in the `counsel-edit-mode buffer'."
   (interactive)
   (unless counsel-edit-mode (user-error "Will only goto in `counsel-edit-mode' buffers"))
   (-let (((&plist :file-name :line-number) (overlay-get (counsel-edit-mode--prev-overlay-for-section) 'metadata)))
@@ -265,7 +269,9 @@ should be used instead of directly calling the `major-mode' functions."
     (display-buffer (current-buffer))))
 
 (defun counsel-edit-mode-expand-all ()
-  "Expand the context of all of the files in the `counsel-edit-mode' buffer until there are no unmatched delimiters."
+  "Expand the context of all of the files in the `counsel-edit-mode' buffer.
+
+Do so until there are no unmatched delimiters."
   (interactive)
   (save-excursion
     (goto-char (point-min))
@@ -289,7 +295,9 @@ Given a prefix ARG, expand the context of all sections in the buffer."
 
 
 (defun counsel-edit-mode-expand-context-up (arg)
-  "Expand the context of the current file up by one line or by the prefix ARG count."
+  "Expand the context of the current file.
+
+Either up by one line or by the prefix ARG count."
   (interactive "P")
   (save-excursion
     (cl-loop for i from 0 below (or arg 1) do
@@ -298,7 +306,9 @@ Given a prefix ARG, expand the context of all sections in the buffer."
                (counsel-edit-mode--insert-overlay file-name (1- line-number))))))
 
 (defun counsel-edit-mode-expand-context-down (arg)
-  "Expand the context of the current file down by one line or by the prefix ARG count."
+  "Expand the context of the current file.
+
+Either down by one line or by the prefix ARG count."
   (interactive "P")
   (save-excursion
     (cl-loop for i from 0 below (or arg 1) do
@@ -711,7 +721,7 @@ Returns nil for the last section in the buffer."
   "See comment near definition for generating (rx).")
 
 (defun counsel-edit-mode--format-buffer ()
-  "Format the counsel-edit-mode buffer.
+  "Format the `counsel-edit-mode' buffer.
 Is a no-op if run multiple times in a `counsel-edit-mode' buffer."
   (unless counsel-edit-mode (user-error "Will only format `counsel-edit-mode' buffers"))
   (unless counsel-edit-mode--formatted-buffer
@@ -782,7 +792,10 @@ Is a no-op if run multiple times in a `counsel-edit-mode' buffer."
                overlay-start-ordered-list)))))
 
 (defun counsel-edit-ediff-mode--generate-original-text-buffer ()
-  "Return a new buffer containing the original text for the current `ag-edit-mode' buffer."
+  "Return a new buffer.
+
+This buffer containing the original text for the current
+`ag-edit-mode' buffer."
   (-let  ((overlays counsel-edit-mode--section-overlays)
           (text (buffer-string))
           (start-major-mode major-mode))
