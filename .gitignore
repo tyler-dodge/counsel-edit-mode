@@ -2,3 +2,4 @@
 build/
 result
 .DS_Store
+*.elc
