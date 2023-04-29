@@ -1,12 +1,25 @@
-* Test 26.3                                                             :PTY:
+* Run Test Interactively
 #+BEGIN_SRC compile-queue
     set -o errexit
     set -o pipefail
     set -o nounset
     cd {{project_root}}
-    nix-build nix/emacs-26.3.nix
+    nix-shell --run "emacs -q --eval '(package-initialize)' \
+    --file '{{project_root}}org-assistant.el' \
+    --eval '(add-to-list '\''package-archives '\''(\"melpa\" . \"https://melpa.org/packages/\") t)' \
+    --eval '(package-initialize)' \
+    --eval '(package-refresh-contents)' \
+    --eval '(package-install-file \"{{project_root}}org-assistant.el\")' \
+    --eval '(package-install '\''el-mock)' \
+    --eval '(require '\''ert)' \
+    --eval '(load-file \"{{project_root}}test/org-assistant-test.el\")' \
+    --eval '(require '\''org-assistant)' \
+    --eval '(ert-run-tests-interactively t)'"
 
 #+END_SRC
+
+#+RESULTS:
+: exited abnormally with code 1
 
 * Test 27.1                                                             :PTY:
 #+BEGIN_SRC compile-queue
@@ -14,10 +27,9 @@
     set -o pipefail
     set -o nounset
     cd {{project_root}}
-    nix-build nix/emacs-27.1.nix
+    nix-build nix/targets.nix -A test.emacs_27_1
 
 #+END_SRC
-
 
 * Test 27.2                                                             :PTY:
 #+BEGIN_SRC compile-queue
@@ -25,7 +37,17 @@
     set -o pipefail
     set -o nounset
     cd {{project_root}}
-    nix-build nix/emacs-27.2.nix
+    nix-build nix/targets.nix -A test.emacs_27_2
+
+#+END_SRC
+
+* Test 28.1                                                             :PTY:
+#+BEGIN_SRC compile-queue
+    set -o errexit
+    set -o pipefail
+    set -o nounset
+    cd {{project_root}}
+    nix-build nix/targets.nix -A test.emacs_28_1
 
 #+END_SRC
 
@@ -35,6 +57,6 @@
     set -o pipefail
     set -o nounset
     cd {{project_root}}
-    nix-build nix/package-lint.nix
+    nix-build nix/targets.nix -A package_lint.emacs_28_1
 
 #+END_SRC

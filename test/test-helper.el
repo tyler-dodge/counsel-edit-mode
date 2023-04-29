@@ -1,6 +1,9 @@
 ;;; -*- lexical-binding: t -*-
 (defvar test-directory nil)
 (defun setup-test-directory (&rest file-list)
+  (cl-loop for buffer in (buffer-list)
+           if (buffer-file-name buffer)
+           do (kill-buffer buffer))
   (unless (and (s-ends-with-p "test/" default-directory)
                (f-exists-p "test"))
     (setq default-directory (f-join default-directory "test")))
